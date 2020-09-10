@@ -1,0 +1,12 @@
+version: '2'
+services:
+  features-postgresql:
+    image: postgres:12.3
+    # volumes:
+    #     - ~/volumes/jhipster/features/postgresql/:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=features
+      - POSTGRES_PASSWORD=
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - 5432:5432

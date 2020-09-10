@@ -1,0 +1,58 @@
+//jhipster import-jdl .../jhipster-jdl.jh --force --experimental --with-entities
+application {
+  config {
+    jhiPrefix sc
+    blueprints [generator-jhipster-kotlin, generator-jhipster-vuejs]
+    reactive false
+    clientThemeVariant dark
+    entitySuffix Entity
+    testFrameworks [gatling]
+    applicationType monolith
+    baseName features
+    packageName com.example.sc
+    authenticationType jwt
+    buildTool gradle
+    cacheProvider no
+    enableHibernateCache false
+    databaseType sql
+    prodDatabaseType postgresql
+    devDatabaseType h2Disk
+    enableTranslation true
+    nativeLanguage en,
+    languages [en, de, ru]
+	clientFramework react
+	useSass true
+    clientPackageManager yarn
+
+    //skipClient true
+  }
+  //entities * except BuyerFs, BuyerScoring
+}
+
+/**
+ * Product manager can control the rollout of features to customers
+ * while developers continually work on new features that might not be in a finished state.
+ */
+//@readOnly
+@service(serviceClass)
+entity Feature {
+  displayName String
+  technicalName String required
+  expiresOn ZonedDateTime
+  description String
+  inverted Boolean
+  //customerIds: string[]
+}
+
+filter all
+
+paginate all with infinite-scroll
+
+// Use Data Transfert Objects (DTO)
+// dto * with mapstruct
+
+// Set service options to all except few
+//service all with serviceClass
+
+// Set an angular suffix
+// angularSuffix * with mySuffix

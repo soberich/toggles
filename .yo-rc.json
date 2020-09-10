@@ -1,0 +1,62 @@
+{
+  "generator-jhipster": {
+    "authenticationType": "jwt",
+    "cacheProvider": "no",
+    "clientFramework": "react",
+    "serverPort": "8080",
+    "serviceDiscoveryType": false,
+    "skipUserManagement": false,
+    "baseName": "features",
+    "buildTool": "gradle",
+    "databaseType": "sql",
+    "devDatabaseType": "h2Disk",
+    "enableHibernateCache": false,
+    "enableSwaggerCodegen": false,
+    "enableTranslation": true,
+    "jhiPrefix": "sc",
+    "languages": ["en", "de", "ru"],
+    "messageBroker": false,
+    "nativeLanguage": "en",
+    "prodDatabaseType": "postgresql",
+    "searchEngine": false,
+    "skipClient": false,
+    "testFrameworks": ["gatling"],
+    "websocket": false,
+    "blueprints": [
+      {
+        "name": "generator-jhipster-kotlin",
+        "version": "1.9.0"
+      },
+      {
+        "name": "generator-jhipster-vuejs",
+        "version": "1.9.1"
+      }
+    ],
+    "reactive": false,
+    "clientThemeVariant": "",
+    "entitySuffix": "Entity",
+    "applicationType": "monolith",
+    "packageName": "com.example.sc",
+    "packageFolder": "com/example/sc",
+    "useSass": true,
+    "clientPackageManager": "yarn",
+    "jhipsterVersion": "6.10.1",
+    "creationTimestamp": 1599747420554,
+    "skipServer": false,
+    "clientTheme": "none",
+    "jwtSecretKey": "M2M1ZjQ2YjZlYmM1NWUyOTYwMDg3MzBmNDUyZjA0ZGI5NzhmZWYxZmMyOTYzMThkOTY0NTA0ZDg4MDk3ZDVjYjM2YTYxM2ExMTRiYjZkYjE4ZTIwYzNhZjBmNjRlNjM2N2U3ZGU4OGY5MzU1OGE5Y2FlNTRmOWQ0OTBmMmY0ODI=",
+    "embeddableLaunchScript": false,
+    "dtoSuffix": "DTO",
+    "otherModules": [
+      {
+        "name": "generator-jhipster-kotlin",
+        "version": "1.9.0"
+      },
+      {
+        "name": "generator-jhipster-vuejs",
+        "version": "1.9.1"
+      }
+    ]
+  },
+  "entities": []
+}
