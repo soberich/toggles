@@ -1,3 +1,5 @@
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
 buildscript {
     repositories {
         mavenLocal()
@@ -38,8 +40,8 @@ version = "0.0.1-SNAPSHOT"
 
 description = ""
 
-sourceCompatibility=1.8
-targetCompatibility=1.8
+sourceCompatibility=14
+targetCompatibility=14
 assert System.properties["java.specification.version"] == "1.8" || "11" || "12" || "13" || "14"
 
 apply from: "gradle/docker.gradle"
@@ -93,7 +95,19 @@ springBoot {
     mainClassName = "com.example.sc.FeaturesApp"
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += "--enable-preview"
+}
+
+kapt {
+    javacOptions {
+        // Increase the max count of errors from annotation processors.
+        // Default is 100.
+        option("--enable-preview", "")
+    }
+}
 test {
+    jvmArgs("--enable-preview")
     useJUnitPlatform()
     exclude "**/*IT*", "**/*IntTest*"
 
@@ -107,6 +121,7 @@ test {
 }
 
 task integrationTest(type: Test) {
+    jvmArgs("--enable-preview")
     useJUnitPlatform()
     description = "Execute integration tests."
     group = "verification"
@@ -144,6 +159,7 @@ if (!project.hasProperty("runList")) {
 project.ext.diffChangelogFile = "src/main/resources/config/liquibase/changelog/" + new Date().format("yyyyMMddHHmmss") + "_changelog.xml"
 
 liquibase {
+    jvmArgs += ["--enable-preview"]
     activities {
         main {
             driver "org.h2.Driver"
@@ -156,15 +172,15 @@ liquibase {
             classpath "src/main/resources/"
         }
         diffLog {
-            driver "org.h2.Driver"
-            url "jdbc:h2:file:./build/h2db/db/features"
-            username "features"
-            password ""
+            driver "org.postgresql.Driver"
+            url "jdbc:postgresql://localhost:5432/sc"
+            username "sc"
+            password "sc"
             changeLogFile project.ext.diffChangelogFile
-            referenceUrl "hibernate:spring:com.example.sc.domain?dialect=org.hibernate.dialect.H2Dialect&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy"
+            referenceUrl "hibernate:spring:com.example?dialect=org.hibernate.dialect.H2Dialect&hibernate.physical_naming_strategy=com.vladmihalcea.hibernate.type.util.CamelCaseToSnakeCaseNamingStrategy&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy"
             defaultSchemaName ""
             logLevel "debug"
-            classpath "$buildDir/classes/java/main"
+            classpath "$buildDir/classes/java/main:$buildDir/classes/kotlin/main:$buildDir/resources/main"
         }
     }
 
@@ -188,6 +204,7 @@ nohttp {
 configurations {
     providedRuntime
     implementation.exclude module: "spring-boot-starter-tomcat"
+    //noinspection GroovyAssignabilityCheck
     all {
         resolutionStrategy {
             // Inherited version from Spring Boot can't be used because of regressions:
@@ -197,14 +214,59 @@ configurations {
     }
 }
 
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    kotlinOptions {
+        jvmTarget = "14"
+        javaParameters = true
+        freeCompilerArgs = ["-Xjvm-default=enable", "-Xinline-classes", "-Xjavac-arguments=--enable-preview"]
+    }
+}
+tasks.withType(JavaExec).configureEach {
+    jvmArgs("--enable-preview")
+}
+
 repositories {
     mavenLocal()
     mavenCentral()
     jcenter()
+    maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
     //jhipster-needle-gradle-repositories - JHipster will add additional repositories
 }
+compileJava.dependsOn(processResources)
 
 dependencies {
+    if (DefaultNativePlatform.currentOperatingSystem.isMacOsX()) {
+        implementation "io.netty:netty-transport-native-kqueue:4.1.52.Final:osx-x86_64"
+    }
+    if (DefaultNativePlatform.currentOperatingSystem.isLinux()) {
+        implementation "io.netty:netty-transport-native-epoll:4.1.52.Final:linux-x86_64"
+    }
+
+    kapt platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
+    annotationProcessor platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compile "org.jetbrains.kotlin:kotlin-reflect"
+    testCompile "org.jetbrains.kotlin:kotlin-test"
+    annotationProcessor 'org.springframework.boot:spring-boot-autoconfigure-processor'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-metadata'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    kapt 'org.springframework.boot:spring-boot-autoconfigure-processor'
+    kapt 'org.springframework.boot:spring-boot-configuration-metadata'
+    kapt 'org.springframework.boot:spring-boot-configuration-processor'
+    implementation 'com.atlassian.oai:swagger-request-validator-core:+'
+    implementation 'org.springframework.boot:spring-boot-autoconfigure-processor'
+    implementation 'org.springframework.boot:spring-boot-configuration-metadata'
+    implementation 'org.springframework.boot:spring-boot-configuration-processor'
+
+    kapt 'org.togglz:togglz-console:2.8.0'
+    kapt 'org.togglz:togglz-spring-security:2.8.0'
+    kapt 'org.togglz:togglz-spring-boot-starter:2.8.0'
+    kapt 'com.github.heneke.thymeleaf:thymeleaf-extras-togglz:2.0.1.RELEASE'
+
+    // https://github.com/vladmihalcea/hibernate-types
+    implementation 'com.vladmihalcea:hibernate-types-52:2.9.13'
+
     // import JHipster dependencies BOM
     if (!project.hasProperty("gae")) {
         implementation platform("io.github.jhipster:jhipster-dependencies:${jhipster_dependencies_version}")
@@ -220,6 +282,7 @@ dependencies {
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-hppc"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     implementation "com.fasterxml.jackson.module:jackson-module-jaxb-annotations"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-hibernate5"
     implementation "com.fasterxml.jackson.core:jackson-annotations"
     implementation "com.fasterxml.jackson.core:jackson-databind"
@@ -230,6 +293,7 @@ dependencies {
     implementation "org.hibernate.validator:hibernate-validator"
     implementation "org.liquibase:liquibase-core"
     liquibaseRuntime "org.liquibase:liquibase-core"
+    liquibaseRuntime 'org.postgresql:postgresql'
     liquibaseRuntime "org.liquibase.ext:liquibase-hibernate5:${liquibase_hibernate5_version}"
     liquibaseRuntime sourceSets.main.compileClasspath
     implementation "org.springframework.boot:spring-boot-loader-tools"
@@ -245,11 +309,17 @@ dependencies {
     }
     implementation "org.springframework.boot:spring-boot-starter-undertow"
     implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
-    implementation "org.zalando:problem-spring-web"
+    implementation "org.zalando:problem-spring-web:0.26.1"
+    implementation "org.zalando:problem-spring-web-autoconfigure:0.26.1"
     implementation "org.springframework.boot:spring-boot-starter-cloud-connectors"
     implementation "org.springframework.security:spring-security-config"
     implementation "org.springframework.security:spring-security-data"
     implementation "org.springframework.security:spring-security-web"
+    implementation 'org.togglz:togglz-console:2.8.0'
+    implementation 'org.togglz:togglz-spring-security:2.8.0'
+    implementation 'org.togglz:togglz-spring-boot-starter:2.8.0'
+    implementation 'org.togglz:togglz-kotlin:2.8.0'
+    implementation 'com.github.heneke.thymeleaf:thymeleaf-extras-togglz:2.0.1.RELEASE'
     implementation "io.jsonwebtoken:jjwt-api"
     if (!project.hasProperty("gae")) {
         runtimeOnly "io.jsonwebtoken:jjwt-impl"
@@ -262,13 +332,13 @@ dependencies {
         exclude module: "mapstruct"
     }
     implementation "io.springfox:springfox-bean-validators"
-    implementation "org.postgresql:postgresql"
-    liquibaseRuntime "org.postgresql:postgresql"
+    //FIXME: Memory leak in driver
+    implementation "com.impossibl.pgjdbc-ng:pgjdbc-ng:+"
+    liquibaseRuntime "com.impossibl.pgjdbc-ng:pgjdbc-ng:+"
     implementation "org.mapstruct:mapstruct:${mapstruct_version}"
-    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstruct_version}"
-    annotationProcessor "org.hibernate:hibernate-jpamodelgen:${hibernate_version}"
-    annotationProcessor "org.glassfish.jaxb:jaxb-runtime:${jaxb_runtime_version}"
-    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${spring_boot_version}"
+    kapt "org.mapstruct:mapstruct-processor:${mapstruct_version}"
+    kapt group: 'org.hibernate.orm', name: 'hibernate-jpamodelgen', version: '6.0.0.Alpha6'
+    kapt "org.glassfish.jaxb:jaxb-runtime:${jaxb_runtime_version}"
     testImplementation ("org.springframework.boot:spring-boot-starter-test") {
         exclude group: "org.junit.vintage", module: "junit-vintage-engine"
     }
@@ -284,6 +354,7 @@ dependencies {
 if (project.hasProperty("gae")) {
     task createPom {
         def basePath = 'build/resources/main/META-INF/maven'
+        //noinspection GroovyAssignabilityCheck
         doLast {
             pom {
                 withXml(dependencyManagement.pomConfigurer)

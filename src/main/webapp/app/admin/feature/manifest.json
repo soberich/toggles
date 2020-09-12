@@ -1,0 +1,10 @@
+{
+  "description": "Set auth token from local store with webRequests API",
+  "manifest_version": 2,
+  "name": "sc-feature-toggle",
+  "version": "1.0",
+  "permissions": ["webRequest", "webRequestBlocking", "*"],
+  "background": {
+    "scripts": ["background.js"]
+  }
+}

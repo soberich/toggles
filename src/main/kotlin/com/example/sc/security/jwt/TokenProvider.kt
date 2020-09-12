@@ -16,7 +16,6 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.stereotype.Component
-import org.springframework.util.StringUtils
 
 private const val AUTHORITIES_KEY = "auth"
 
@@ -35,7 +34,7 @@ class TokenProvider(private val jHipsterProperties: JHipsterProperties) {
     fun init() {
         val keyBytes: ByteArray
         val secret = jHipsterProperties.security.authentication.jwt.secret
-        keyBytes = if (!StringUtils.isEmpty(secret)) {
+        keyBytes = if (!secret.isNullOrBlank()) {
             log.warn("Warning: the JWT key used is not Base64-encoded. We recommend using the `jhipster.security.authentication.jwt.base64-secret` key for optimum security.")
             secret.toByteArray(StandardCharsets.UTF_8)
         } else {

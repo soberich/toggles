@@ -1,0 +1,15 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+    <changeSet author="s.nazin (generated)" id="1599831169504-2">
+        <!--language=H2-->
+        <sql dbms="h2">
+            CREATE DOMAIN IF NOT EXISTS JSONB AS JSON;
+            CREATE DOMAIN IF NOT EXISTS HSTORE AS TEXT;
+        </sql>
+        <!--language=PostgreSQL-->
+        <sql dbms="postgresql">
+            CREATE EXTENSION IF NOT EXISTS hstore;
+            CREATE EXTENSION IF NOT EXISTS pgcrypto;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

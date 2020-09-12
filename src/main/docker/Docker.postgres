@@ -1,0 +1,4 @@
+FROM postgres
+
+COPY extensions.sql /docker-entrypoint-initdb.d
+RUN echo "Extensions installed"

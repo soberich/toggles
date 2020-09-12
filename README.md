@@ -1,3 +1,35 @@
+Prerequisites:
+
+- Please make you `JAVA_HOME` point to JDK 14
+
+### Tech Used:
+
+- Project is generated with JHipster (Koltin + Vue stack, relatively new)
+- There was an attempt to integrate eisting library Togglz, but it proved not good choose.
+  Security didn't work for embedded frame, SPI design not perfect, in production project this integration wouldv'e not pass POC.
+- Fully functional extensible frontend and backend.
+- Choice of JHipster was made willing to provide a fully fledged production-like solution.
+- For a show case some extended capabilities of PostgreSQL used (table inheritance, triggers)
+- The leftover of Togglz prevents API from fully working.
+
+To test please run
+
+```integrationperformancetest
+./gradlew test --tests "com.example.sc.web.rest.FeatureToggleIT"
+```
+
+To see the actual work done on to generated piece see the `HEAD` commit.
+
+# Assumptions
+
+1. There are a limited number of cusomers. Assumption is that number is estimated to dozens, maximum hundreds of customers.
+   This although, is not due to bottle-neck somewhere in throught put, but because of UI/UX considerations.
+   Currently, all customerIds are displayed. A reasonable limit enforced in DB so that 2000 symbols are available for concatenating all customerIds with `&` symbol.
+
+---
+
+Generated README below!
+
 # features
 
 This application was generated using JHipster 6.10.1, you can find documentation and help at [https://www.jhipster.tech/documentation-archive/v6.10.1](https://www.jhipster.tech/documentation-archive/v6.10.1).

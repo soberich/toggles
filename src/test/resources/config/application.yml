@@ -21,12 +21,12 @@ spring:
     name: features
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:h2:mem:features;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:features;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_UPPER=FALSE;DATABASE_TO_LOWER=TRUE;INIT=RUNSCRIPT FROM 'classpath:h2-init.sql'
     name:
     username:
     password:
     hikari:
-      auto-commit: false
+      auto-commit: true
   jackson:
     serialization:
       write-durations-as-timestamps: false
@@ -41,11 +41,11 @@ spring:
         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
     properties:
       hibernate.id.new_generator_mappings: true
-      hibernate.connection.provider_disables_autocommit: true
+#      hibernate.connection.provider_disables_autocommit: false
       hibernate.cache.use_second_level_cache: false
       hibernate.cache.use_query_cache: false
       hibernate.generate_statistics: false
-      hibernate.hbm2ddl.auto: validate
+      hibernate.hbm2ddl.auto: none
       hibernate.jdbc.time_zone: UTC
   liquibase:
     contexts: test

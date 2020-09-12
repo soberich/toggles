@@ -11,6 +11,9 @@ import java.nio.file.Paths
 import javax.servlet.ServletContext
 import javax.servlet.ServletException
 import org.slf4j.LoggerFactory
+import org.springframework.boot.actuate.trace.http.HttpTraceRepository
+import org.springframework.boot.actuate.trace.http.InMemoryHttpTraceRepository
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties
 import org.springframework.boot.web.server.MimeMappings
 import org.springframework.boot.web.server.WebServerFactory
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
@@ -29,6 +32,7 @@ import org.springframework.web.filter.CorsFilter
  */
 @Configuration
 class WebConfigurer(
+    private val c: DataSourceProperties,
     private val env: Environment,
     private val jHipsterProperties: JHipsterProperties
 ) : ServletContextInitializer, WebServerFactoryCustomizer<WebServerFactory> {
@@ -40,9 +44,8 @@ class WebConfigurer(
         if (env.activeProfiles.isNotEmpty()) {
             log.info("Web application configuration, using profiles: {}", *env.activeProfiles as Array<*>)
         }
-
-        if (env.acceptsProfiles(Profiles.of(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT))) {
-            initH2Console(servletContext)
+        if (env.acceptsProfiles(Profiles.of(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT)) && "h2" in c.determineDriverClassName()) {
+            H2ConfigurationHelper.initH2Console(servletContext)
         }
         log.info("Web application fully configured")
     }
@@ -112,11 +115,6 @@ class WebConfigurer(
         return CorsFilter(source)
     }
 
-    /**
-     * Initializes H2 console.
-     */
-    private fun initH2Console(servletContext: ServletContext) {
-        log.debug("Initialize H2 console")
-        H2ConfigurationHelper.initH2Console(servletContext)
-    }
+    @Bean
+    fun httpTraceRepository(): HttpTraceRepository = InMemoryHttpTraceRepository()
 }

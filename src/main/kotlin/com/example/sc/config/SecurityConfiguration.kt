@@ -38,6 +38,7 @@ class SecurityConfiguration(
             .antMatchers("/content/**")
             .antMatchers("/h2-console/**")
             .antMatchers("/swagger-ui/index.html")
+            .antMatchers("/management/toggles-console/**")
             .antMatchers("/test/**")
     }
 
@@ -59,7 +60,7 @@ class SecurityConfiguration(
             .featurePolicy("geolocation 'none'; midi 'none'; sync-xhr 'none'; microphone 'none'; camera 'none'; magnetometer 'none'; gyroscope 'none'; speaker 'none'; fullscreen 'self'; payment 'none'")
         .and()
             .frameOptions()
-            .deny()
+            .sameOrigin()
         .and()
             .sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -74,7 +75,8 @@ class SecurityConfiguration(
             .antMatchers("/management/health").permitAll()
             .antMatchers("/management/info").permitAll()
             .antMatchers("/management/prometheus").permitAll()
-            .antMatchers("/management/**").hasAuthority(ADMIN)
+            .antMatchers("/management/toggles-console/**").permitAll()
+            .antMatchers("/management/togglz/**").hasAuthority(ADMIN)
         .and()
             .httpBasic()
         .and()

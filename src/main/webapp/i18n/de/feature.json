@@ -1,0 +1,24 @@
+{
+  "feature": {
+    "home": {
+      "title": "Features",
+      "createLabel": "Feature erstellen",
+      "createOrEditLabel": "Feature erstellen oder bearbeiten",
+      "notFound": "No Features found"
+    },
+    "created": "Feature erstellt mit ID {{ param }}",
+    "updated": "Feature aktualisiert mit ID {{ param }}",
+    "deleted": "Feature gelöscht mit ID {{ param }}",
+    "delete": {
+      "question": "Soll Feature {{ id }} wirklich dauerhaft gelöscht werden?"
+    },
+    "detail": {
+      "title": "Feature"
+    },
+    "displayName": "Display Name",
+    "technicalName": "Technical Name",
+    "expiresOn": "Expires On",
+    "description": "Description",
+    "inverted": "Inverted"
+  }
+}

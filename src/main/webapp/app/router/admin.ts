@@ -9,8 +9,33 @@ const ScHealthComponent = () => import('@/admin/health/health.vue');
 const ScLogsComponent = () => import('@/admin/logs/logs.vue');
 const ScAuditsComponent = () => import('@/admin/audits/audits.vue');
 const ScMetricsComponent = () => import('@/admin/metrics/metrics.vue');
+const Feature = () => import('@/admin/feature/feature.vue');
 
 export default [
+  {
+    path: '/feature',
+    name: 'Feature',
+    component: Feature,
+    meta: { authorities: [Authority.USER] },
+  },
+  {
+    path: '/feature/new',
+    name: 'FeatureCreate',
+    component: Feature,
+    meta: { authorities: [Authority.ADMIN] },
+  },
+  {
+    path: '/feature/:featureId/edit',
+    name: 'FeatureEdit',
+    component: Feature,
+    meta: { authorities: [Authority.ADMIN] },
+  },
+  {
+    path: '/feature/:featureId/view',
+    name: 'FeatureView',
+    component: Feature,
+    meta: { authorities: [Authority.USER] },
+  },
   {
     path: '/admin/user-management',
     name: 'ScUser',

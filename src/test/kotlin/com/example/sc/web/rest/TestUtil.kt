@@ -19,7 +19,7 @@ import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar
 import org.springframework.format.support.DefaultFormattingConversionService
 import org.springframework.format.support.FormattingConversionService
 
-private val mapper = createObjectMapper()
+val mapper = createObjectMapper()
 
 private fun createObjectMapper() =
     ObjectMapper().apply {
@@ -113,10 +113,10 @@ fun createFormattingConversionService(): FormattingConversionService {
  * @return a list of all found objects.
  * @param <T> the type of objects to be searched.
  */
-fun <T : Any> EntityManager.findAll(clazz: KClass<T>): List<T> {
+inline fun <reified T : Any> EntityManager.findAll(): List<T> {
     val cb = this.criteriaBuilder
-    val cq = cb.createQuery(clazz.java)
-    val rootEntry = cq.from(clazz.java)
+    val cq = cb.createQuery(T::class.java)
+    val rootEntry = cq.from(T::class.java)
     val all = cq.select(rootEntry)
     return this.createQuery(all).resultList
 }

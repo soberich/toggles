@@ -15,113 +15,147 @@
 # ===================================================================
 
 management:
-  endpoints:
-    web:
-      base-path: /management
-      exposure:
-        include: ['configprops', 'env', 'health', 'info', 'jhimetrics', 'logfile', 'loggers', 'prometheus', 'threaddump']
-  endpoint:
-    health:
-      show-details: when_authorized
-      roles: 'ROLE_ADMIN'
-    jhimetrics:
-      enabled: true
-  info:
-    git:
-      mode: full
-  health:
-    mail:
-      enabled: false # When using the MailService, configure an SMTP server and set this to true
-  metrics:
-    export:
-      # Prometheus is the default metrics backend
-      prometheus:
-        enabled: true
-        step: 60
-    enable:
-      http: true
-      jvm: true
-      logback: true
-      process: true
-      system: true
-    distribution:
-      percentiles-histogram:
-        all: true
-      percentiles:
-        all: 0, 0.5, 0.75, 0.95, 0.99, 1.0
-    tags:
-      application: ${spring.application.name}
-    web:
-      server:
-        request:
-          autotime:
+    endpoints:
+        enabled-by-default: true
+        web:
+            context-path: /management
+            base-path: /management
+            exposure:
+                include: '*'
+    endpoint:
+        health:
+            enabled:      true
+            show-details: when_authorized
+            roles:        'ROLE_ADMIN'
+        jhimetrics:
             enabled: true
-
+        info:
+            enabled: true
+    info:
+        git:
+            mode: full
+    health:
+        mail:
+            enabled: false # When using the MailService, configure an SMTP server and set this to true
+    metrics:
+        export:
+            # Prometheus is the default metrics backend
+            prometheus:
+                enabled: true
+                step:    60
+        enable:
+            http:    true
+            jvm:     true
+            logback: true
+            process: true
+            system:  true
+        distribution:
+            percentiles-histogram:
+                all: true
+            percentiles:
+                all: 0, 0.5, 0.75, 0.95, 0.99, 1.0
+        tags:
+            application: ${spring.application.name}
+        web:
+            server:
+                request:
+                    autotime:
+                        enabled: true
+    trace:
+        http:
+            enabled: true
+            include:
+                - AUTHORIZATION_HEADER
+                - COOKIE_HEADERS
+                - PRINCIPAL
+                - REMOTE_ADDRESS
+                - REQUEST_HEADERS
+                - RESPONSE_HEADERS
+                - SESSION_ID
+                - TIME_TAKEN
+#    server:
+#        port: 8081
 spring:
-  application:
-    name: features
-  profiles:
-    # The commented value for `active` can be replaced with valid Spring profiles to load.
-    # Otherwise, it will be filled in by gradle when building the JAR file
-    # Either way, it can be overridden by `--spring.profiles.active` value passed in the commandline or `-Dspring.profiles.active` set in `JAVA_OPTS`
-    active: #spring.profiles.active#
-  jmx:
-    enabled: false
-  data:
+    application:
+        name: features
+    autoconfigure:
+        exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
+    profiles:
+        # The commented value for `active` can be replaced with valid Spring profiles to load.
+        # Otherwise, it will be filled in by gradle when building the JAR file
+        # Either way, it can be overridden by `-Dspring.profiles.active` set in `JAVA_OPTS`
+        active: #spring.profiles.active#
+        include: default
+    jmx:
+        enabled: false
+    data:
+        jpa:
+            repositories:
+                bootstrap-mode: deferred
     jpa:
-      repositories:
-        bootstrap-mode: deferred
-  jpa:
-    open-in-view: false
-    properties:
-      hibernate.jdbc.time_zone: UTC
-      hibernate.id.new_generator_mappings: true
-      hibernate.connection.provider_disables_autocommit: true
-      hibernate.cache.use_second_level_cache: false
-      hibernate.cache.use_query_cache: false
-      hibernate.generate_statistics: false
-      # modify batch size as necessary
-      hibernate.jdbc.batch_size: 25
-      hibernate.order_inserts: true
-      hibernate.order_updates: true
-      hibernate.query.fail_on_pagination_over_collection_fetch: true
-      hibernate.query.in_clause_parameter_padding: true
-    hibernate:
-      ddl-auto: none
-      naming:
-        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
-        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
-  messages:
-    basename: i18n/messages
-  main:
-    allow-bean-definition-overriding: true
-  task:
-    execution:
-      thread-name-prefix: features-task-
-      pool:
-        core-size: 2
-        max-size: 50
-        queue-capacity: 10000
-    scheduling:
-      thread-name-prefix: features-scheduling-
-      pool:
-        size: 2
-  thymeleaf:
-    mode: HTML
-  output:
-    ansi:
-      console-available: true
-
+#        database: postgresql
+        open-in-view: false
+        properties:
+            hibernate.jdbc.time_zone:                                 UTC
+            hibernate.id.new_generator_mappings:                      true
+#            hibernate.connection.provider_disables_autocommit:        fasle
+            hibernate.cache.use_second_level_cache:                   false
+            hibernate.cache.use_query_cache:                          false
+            hibernate.generate_statistics:                            false
+            # modify batch size as necessary
+            hibernate.jdbc.batch_size:                                25
+            hibernate.order_inserts:                                  true
+            hibernate.order_updates:                                  true
+            hibernate.query.fail_on_pagination_over_collection_fetch: true
+            hibernate.query.in_clause_parameter_padding:              true
+#            hibernate.temp.use_jdbc_metadata_defaults: false
+        hibernate:
+            ddl-auto: none
+            naming:
+                physical-strategy: com.vladmihalcea.hibernate.type.util.CamelCaseToSnakeCaseNamingStrategy
+                implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+    messages:
+        basename: i18n/messages
+    main:
+        allow-bean-definition-overriding: true
+        log-startup-info: true
+    mvc:
+        throw-exception-if-no-handler-found: true
+    task:
+        execution:
+            thread-name-prefix: features-task-
+            pool:
+                core-size:      2
+                max-size:       50
+                queue-capacity: 10000
+        scheduling:
+            thread-name-prefix: features-scheduling-
+            pool:
+                size: 2
+    thymeleaf:
+        mode: HTML
+    output:
+        ansi:
+            console-available: true
+            enabled: always
+    datasource:
+        hikari:
+            auto-commit: true
 server:
-  servlet:
-    session:
-      cookie:
-        http-only: true
+    servlet:
+        session:
+            cookie:
+                http-only: true
+    error:
+        include-exception: true
+        include-stacktrace: always
+        whitelabel:
+            enabled: false
 
 # Properties to be exposed on the /info management endpoint
 info:
-  # Comma separated list of profiles that will trigger the ribbon to show
-  display-ribbon-on-profiles: 'dev'
+    # Comma separated list of profiles that will trigger the ribbon to show
+    display-ribbon-on-profiles: 'dev'
 
 # ===================================================================
 # JHipster specific properties
@@ -130,29 +164,29 @@ info:
 # ===================================================================
 
 jhipster:
-  clientApp:
-    name: 'featuresApp'
-  # By default CORS is disabled. Uncomment to enable.
-  # cors:
-  #     allowed-origins: "*"
-  #     allowed-methods: "*"
-  #     allowed-headers: "*"
-  #     exposed-headers: "Authorization,Link,X-Total-Count"
-  #     allow-credentials: true
-  #     max-age: 1800
-  mail:
-    from: features@localhost
-  swagger:
-    default-include-pattern: /api/.*
-    title: features API
-    description: features API documentation
-    version: 0.0.1
-    terms-of-service-url:
-    contact-name:
-    contact-url:
-    contact-email:
-    license: unlicensed
-    license-url:
+    clientApp:
+        name: 'featuresApp'
+    #By default CORS is disabled. Uncomment to enable.
+    cors:
+        allowed-origins: [ "*" ]
+        allowed-methods: [ "*" ]
+        allowed-headers: [ "*" ]
+        exposed-headers: [ "Authorization", "Link", "X-Total-Count" ]
+        allow-credentials: true
+        max-age:           1800
+    mail:
+        from: features@localhost
+    swagger:
+        default-include-pattern: /api/.*
+        title:                   features API
+        description:             features API documentation
+        version:                 0.0.1
+        terms-of-service-url:
+        contact-name:
+        contact-url:
+        contact-email:
+        license:                 unlicensed
+        license-url:
 # ===================================================================
 # Application specific properties
 # Add your own application properties here, see the ApplicationProperties class
@@ -162,4 +196,24 @@ jhipster:
 # https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-# application:
+### STAYS ON COMMON APP PORT ###
+togglz:
+    enabled: true # Enable Togglz for the application.
+    #    feature-manager-name: # The name of the feature manager.
+    cache:
+        enabled:      false # Enable feature state caching.
+        time-to-live: 0 # The time after which a cache entry will expire.
+        time-unit:    milliseconds # The time unit as java.util.concurrent.TimeUnit enum name (one of "nanoseconds", "microseconds", "milliseconds", "seconds", "minutes", "hours", "days").
+    console:
+        enabled:                 true # Enable admin console.
+        path:                    /management/toggles-console # The path of the admin console when enabled.
+        feature-admin-authority: ROLE_ADMIN # The name of the authority that is allowed to access the admin console.
+        secured:                 false # Indicates if the admin console runs in secured mode. If false the application itself should take care of securing the admin console.
+        use-management-port:     false # Indicates if the admin console runs on the management port. If no management port is configured it will run on the application port. If set to true the console path will also be prefixed with the management.context-path.
+    endpoint: # Only for Spring Boot 1.x (for Spring Boot 2.x see https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html)
+        id:        toggles # The endpoint identifier.
+        enabled:   true # Enable actuator endpoint.
+        sensitive: true # Indicates if the endpoint exposes sensitive information.
+    web:
+        register-feature-interceptor: true
+

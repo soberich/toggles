@@ -14,56 +14,70 @@
 # ===================================================================
 
 logging:
-  level:
-    ROOT: DEBUG
-    io.github.jhipster: DEBUG
-    com.example.sc: DEBUG
+    level:
+        ROOT:                                                   DEBUG
+        io.github.jhipster:                                     DEBUG
+        com.example.sc:                                         DEBUG
+        org.hibernate.SQL:                                      TRACE
+        org.hibernate.resource.jdbc:                            TRACE
+        org.hibernate.persister.entity:                         DEBUG
+        org.hibernate.type.descriptor.sql:                      TRACE
+        org.hibernate.loader.plan.build.spi:                    TRACE
+        org.hibernate.engine.internal.Cascade:                  TRACE
+        org.mariadb.jdbc.internal.logging.ProtocolLoggingProxy: TRACE
 
 spring:
-  profiles:
-    active: dev
-    include:
-      - swagger
-      # Uncomment to activate TLS for the dev profile
-      #- tls
-  devtools:
-    restart:
-      enabled: true
-      additional-exclude: static/**,.h2.server.properties
-    livereload:
-      enabled: false # we use Webpack dev server + BrowserSync for livereload
-  jackson:
-    serialization:
-      indent-output: true
-  datasource:
-    type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:h2:file:./build/h2db/db/features;DB_CLOSE_DELAY=-1
-    username: features
-    password:
-    hikari:
-      poolName: Hikari
-      auto-commit: false
-  h2:
-    console:
-      enabled: false
-  jpa:
-    database-platform: io.github.jhipster.domain.util.FixedH2Dialect
-    show-sql: true
-  liquibase:
-    # Remove 'faker' if you do not want the sample data to be loaded automatically
-    contexts: dev, faker
-  mail:
-    host: localhost
-    port: 25
-    username:
-    password:
-  messages:
-    cache-duration: PT1S # 1 second, see the ISO 8601 standard
-  thymeleaf:
-    cache: false
+    profiles:
+        active: dev
+        include:
+            - swagger
+            - default
+            # Uncomment to activate TLS for the dev profile
+            #- tls
+    devtools:
+        restart:
+            enabled:            true
+            additional-exclude: static/**,.h2.server.properties
+        livereload:
+            enabled: false # we use Webpack dev server + BrowserSync for livereload
+    jackson:
+        serialization:
+            indent-output: true
+    datasource:
+#        driver-class-name: com.impossibl.postgres.jdbc.PGDriver
+#        driver-class-name: org.postgresql.Driver
+        driver-class-name: org.h2.Driver
+#        type:              com.impossibl.postgres.jdbc.PGDataSource
+        type:              com.zaxxer.hikari.HikariDataSource
+        url: jdbc:h2:retry:./build/h2db/db/features;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;INIT=RUNSCRIPT FROM 'classpath:h2-init.sql'
+#        url:               jdbc:pgsql:sc?sql.trace=true
+#        url:               jdbc:postgresql://localhost:5432/sc
+        username:          sc
+        password:          sc
+        hikari:
+            poolName:    Hikari
+            auto-commit: true
+    h2:
+        console:
+            enabled: false
+    jpa:
+        database-platform: io.github.jhipster.domain.util.FixedH2Dialect
+        show-sql:          true
+    liquibase:
+        # Remove 'faker' if you do not want the sample data to be loaded automatically
+        contexts: dev, faker
+    mail:
+        host: localhost
+        port: 25
+        username:
+        password:
+    messages:
+        cache-duration: PT1S # 1 second, see the ISO 8601 standard
+    thymeleaf:
+        cache: false
 
 server:
-  port: 8080
+    port: 8080
 
 # ===================================================================
 # JHipster specific properties
@@ -72,37 +86,37 @@ server:
 # ===================================================================
 
 jhipster:
-  # CORS is only enabled by default with the "dev" profile, so BrowserSync can access the API
-  cors:
-    allowed-origins: '*'
-    allowed-methods: '*'
-    allowed-headers: '*'
-    exposed-headers: 'Authorization,Link,X-Total-Count'
-    allow-credentials: true
-    max-age: 1800
-  security:
-    authentication:
-      jwt:
-        # This token must be encoded using Base64 and be at least 256 bits long (you can type `openssl rand -base64 64` on your command line to generate a 512 bits one)
-        base64-secret: M2M1ZjQ2YjZlYmM1NWUyOTYwMDg3MzBmNDUyZjA0ZGI5NzhmZWYxZmMyOTYzMThkOTY0NTA0ZDg4MDk3ZDVjYjM2YTYxM2ExMTRiYjZkYjE4ZTIwYzNhZjBmNjRlNjM2N2U3ZGU4OGY5MzU1OGE5Y2FlNTRmOWQ0OTBmMmY0ODI=
-        # Token is valid 24 hours
-        token-validity-in-seconds: 86400
-        token-validity-in-seconds-for-remember-me: 2592000
-  mail: # specific JHipster mail property, for standard properties see MailProperties
-    base-url: http://127.0.0.1:8080
-  metrics:
-    logs: # Reports metrics in the logs
-      enabled: false
-      report-frequency: 60 # in seconds
-  logging:
-    use-json-format: false # By default, logs are not in Json format
-    logstash: # Forward logs to logstash over a socket, used by LoggingConfiguration
-      enabled: false
-      host: localhost
-      port: 5000
-      queue-size: 512
-  audit-events:
-    retention-period: 30 # Number of days before audit events are deleted.
+    # CORS is only enabled by default with the "dev" profile, so BrowserSync can access the API
+    cors:
+        allowed-origins:   '*'
+        allowed-methods:   '*'
+        allowed-headers:   '*'
+        exposed-headers:   'Authorization,Link,X-Total-Count'
+        allow-credentials: true
+        max-age:           1800
+    security:
+        authentication:
+            jwt:
+                # This token must be encoded using Base64 and be at least 256 bits long (you can type `openssl rand -base64 64` on your command line to generate a 512 bits one)
+                base64-secret:                             M2M1ZjQ2YjZlYmM1NWUyOTYwMDg3MzBmNDUyZjA0ZGI5NzhmZWYxZmMyOTYzMThkOTY0NTA0ZDg4MDk3ZDVjYjM2YTYxM2ExMTRiYjZkYjE4ZTIwYzNhZjBmNjRlNjM2N2U3ZGU4OGY5MzU1OGE5Y2FlNTRmOWQ0OTBmMmY0ODI=
+                # Token is valid 24 hours
+                token-validity-in-seconds:                 86400
+                token-validity-in-seconds-for-remember-me: 2592000
+    mail: # specific JHipster mail property, for standard properties see MailProperties
+        base-url: http://127.0.0.1:8080
+    metrics:
+        logs: # Reports metrics in the logs
+            enabled:          false
+            report-frequency: 60 # in seconds
+    logging:
+        use-json-format: false # By default, logs are not in Json format
+        logstash: # Forward logs to logstash over a socket, used by LoggingConfiguration
+            enabled:    false
+            host:       localhost
+            port:       5000
+            queue-size: 512
+    audit-events:
+        retention-period: 30 # Number of days before audit events are deleted.
 
 # ===================================================================
 # Application specific properties
@@ -113,4 +127,29 @@ jhipster:
 # https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-# application:
+togglz:
+    features: # The feature states. Only needed if feature states are stored in application properties.
+        my-feature-a:
+            enabled:  true
+            strategy: username
+            param:
+                inverted: false
+                expired:  false
+        my-feature-b:
+            enabled:  false
+            strategy: username
+            param:
+                inverted: true
+                expired:  false
+        my-feature-c:
+            enabled:  false
+            strategy: username
+            param:
+                inverted: false
+                expired:  false
+        my-feature-d:
+            enabled:  true
+            strategy: username
+            param:
+                inverted: false
+                expired:  true

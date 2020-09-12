@@ -1,0 +1,128 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+    <changeSet author="s.nazin (generated)" id="1599831169504-2">
+        <!--language=H2-->
+        <sql dbms="h2" splitStatements="false">
+            CREATE DOMAIN IF NOT EXISTS JSONB AS JSON;
+            CREATE DOMAIN IF NOT EXISTS HSTORE AS TEXT;
+        </sql>
+        <!--language=PostgreSQL-->
+        <sql dbms="postgresql" splitStatements="false">
+            CREATE EXTENSION IF NOT EXISTS hstore;
+            CREATE EXTENSION IF NOT EXISTS pgcrypto;
+        </sql>
+        <!--language=SQL-->
+        <sql splitStatements="false">
+            CREATE TABLE feature_toggle_state
+            (
+                feature_name       VARCHAR(100) NOT NULL CONSTRAINT feature_toggle_state_pkey PRIMARY KEY,
+                feature_enabled    BIT(1), -- compatibility with togglz
+                strategy_id        VARCHAR(200),
+                strategy_params    ${JSONB},
+                archived           BOOLEAN,
+                created_by         VARCHAR(255),
+                created_date       TIMESTAMP,
+                last_modified_by   VARCHAR(255),
+                last_modified_date TIMESTAMP
+            );
+        </sql>
+        <!--language=H2-->
+        <sql dbms="h2" splitStatements="false">
+            CREATE DOMAIN IF NOT EXISTS JSONB AS JSON;
+            CREATE DOMAIN IF NOT EXISTS HSTORE AS TEXT;
+            CREATE TABLE features_archive
+            (
+                feature_name       VARCHAR(100) NOT NULL,
+                feature_enabled    BIT(1), -- compatibility with togglz
+                strategy_id        VARCHAR(200),
+                strategy_params    ${JSONB},
+                archived           BOOLEAN ,
+                created_by         VARCHAR(255),
+                created_date       TIMESTAMP,
+                last_modified_by   VARCHAR(255),
+                last_modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
+                CONSTRAINT features_archive_archived_check CHECK (archived IS TRUE)
+            );
+        </sql>
+
+        <!--language=PostgreSQL-->
+        <sql dbms="postgresql" splitStatements="false">
+
+            -- CREATE INDEX idx_feature_toggle_state_strategy_params ON feature_toggle_state USING GIN (strategy_params NULLS LAST)
+            -- [2020-09-09 15:15:27] [42704] ERROR: data type character varying has no default operator class for access method "gin"
+            -- [2020-09-09 15:15:27] Hint: You must specify an operator class for the index or define a default operator class for the data type.
+            -- CREATE INDEX idx_feature_name ON feature_toggle_state (feature_name);
+            -- CREATE INDEX idx_feature_toggle_state_strategy_params ON feature_toggle_state USING GIN (strategy_params NULLS LAST);
+            -- CREATE INDEX idx_feature_toggle_state_strategy_params_json_path ON feature_toggle_state USING GIN (strategy_params jsonb_path_ops NULLS LAST);
+
+            -- Name: feature_toggle_state tg__timestamps(); Type: FUNCTION; Schema: public; -
+            --
+
+            CREATE OR REPLACE FUNCTION tg__timestamps() RETURNS trigger
+                LANGUAGE plpgsql
+                SET search_path TO 'public'
+            AS $$
+            begin
+                NEW.created_date = (case when TG_OP = 'INSERT' then NOW() else OLD.created_date end);
+                NEW.last_modified_date = (case when TG_OP = 'UPDATE' and OLD.last_modified_date >= NOW() then OLD.last_modified_date + interval '1 millisecond' else NOW() end);
+                return NEW;
+            end;
+            $$;
+
+            -- Names are prefixed to preserve order
+            --
+            -- Name: feature_toggle_state _100_timestamps; Type: TRIGGER; Schema: public; -
+            --
+            DROP TRIGGER IF EXISTS __100__timestamps
+                ON feature_toggle_state;
+
+            CREATE TRIGGER __100__timestamps
+                BEFORE
+                    INSERT OR
+                    UPDATE
+                ON feature_toggle_state
+                FOR EACH ROW
+            EXECUTE PROCEDURE tg__timestamps();
+
+            DROP TABLE IF EXISTS features_archive;
+
+            CREATE TABLE features_archive (
+                CHECK (archived IS TRUE)
+            ) INHERITS(feature_toggle_state);
+
+            CREATE OR REPLACE FUNCTION tg__soft_delete() RETURNS trigger
+                SET search_path TO 'public'
+                as $$
+            BEGIN
+                -- When a soft-delete happens...
+                IF (TG_OP = 'UPDATE' AND NEW.archived IS NOT NULL AND NEW.archived IS TRUE) THEN
+                    EXECUTE format('DELETE FROM %I.%I WHERE feature_name = $1', TG_TABLE_SCHEMA, TG_TABLE_NAME) USING OLD.feature_name;
+                    RETURN OLD;
+                END IF;
+                -- When a hard-DELETE or a cascaded delete happens
+                IF (TG_OP = 'DELETE') THEN
+                    IF (OLD.archived IS NULL OR OLD.archived IS FALSE) THEN
+                        OLD.archived := TRUE;
+                    END IF;
+                    EXECUTE format('INSERT INTO %I.%I SELECT $1.*'
+                        , TG_TABLE_SCHEMA, TG_TABLE_NAME || '_archive')
+                        USING OLD;
+                END IF;
+                RETURN NULL;
+            END;
+            $$ LANGUAGE plpgsql;
+
+            DROP TRIGGER IF EXISTS __200__soft_archive
+                ON feature_toggle_state;
+
+            CREATE TRIGGER __200__soft_archive
+                AFTER
+                    UPDATE OF archived
+                    OR DELETE
+                ON feature_toggle_state
+                FOR EACH ROW
+            EXECUTE PROCEDURE tg__soft_delete();
+        </sql>
+    </changeSet>
+</databaseChangeLog>

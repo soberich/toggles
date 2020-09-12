@@ -12,9 +12,10 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
 import org.springframework.core.env.Environment
+import org.togglz.spring.boot.actuate.autoconfigure.TogglzProperties
 
-@SpringBootApplication
-@EnableConfigurationProperties(LiquibaseProperties::class, ApplicationProperties::class)
+@SpringBootApplication(scanBasePackages = ["com.example", "org.togglz"])
+@EnableConfigurationProperties(LiquibaseProperties::class, ApplicationProperties::class, TogglzProperties::class)
 class FeaturesApp(private val env: Environment) {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -30,16 +31,16 @@ class FeaturesApp(private val env: Environment) {
     fun initApplication() {
         val activeProfiles = env.activeProfiles
         if (
-            activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) &&
-            activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
+            JHipsterConstants.SPRING_PROFILE_DEVELOPMENT in activeProfiles &&
+            JHipsterConstants.SPRING_PROFILE_PRODUCTION in activeProfiles
         ) {
             log.error(
                 "You have misconfigured your application! It should not run with both the 'dev' and 'prod' profiles at the same time."
             )
         }
         if (
-            activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) &&
-            activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_CLOUD)
+            JHipsterConstants.SPRING_PROFILE_DEVELOPMENT in activeProfiles &&
+            JHipsterConstants.SPRING_PROFILE_CLOUD in activeProfiles
         ) {
             log.error(
                 "You have misconfigured your application! It should not run with both the 'dev' and 'cloud' profiles at the same time."

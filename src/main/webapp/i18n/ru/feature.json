@@ -1,0 +1,24 @@
+{
+  "feature": {
+    "home": {
+      "title": "Features",
+      "createLabel": "Создать новый Feature",
+      "createOrEditLabel": "Создать или отредактировать Feature",
+      "notFound": "No Features found"
+    },
+    "created": "Новый Feature создан с идентификатором {{ param }}",
+    "updated": "Feature обновлен с идентификатором {{ param }}",
+    "deleted": "Feature удален с идентификатором {{ param }}",
+    "delete": {
+      "question": "Вы уверены что хотите удалить Feature {{ id }}?"
+    },
+    "detail": {
+      "title": "Feature"
+    },
+    "displayName": "Display Name",
+    "technicalName": "Technical Name",
+    "expiresOn": "Expires On",
+    "description": "Description",
+    "inverted": "Inverted"
+  }
+}
